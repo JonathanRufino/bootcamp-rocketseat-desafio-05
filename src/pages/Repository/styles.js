@@ -105,7 +105,7 @@ export const IssueList = styled.ul`
 export const IssueState = styled.div`
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 
   button {
     background: transparent;
@@ -120,6 +120,27 @@ export const IssueState = styled.div`
       cursor: auto;
       background: #7159c1;
       color: #fff;
+    }
+  }
+`;
+
+export const Pagination = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+
+  button {
+    background: transparent;
+    padding: 8px;
+    width: 150px;
+    border: 1px solid #7159c1;
+    color: #7159c1;
+    border-radius: 4px;
+    margin: 0 20px;
+
+    &:disabled {
+      cursor: auto;
+      opacity: 0.5;
     }
   }
 `;

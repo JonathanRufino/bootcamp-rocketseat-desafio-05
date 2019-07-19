@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import Container from '../../components/Container';
 
-import { Loading, Owner, IssueList, IssueState } from './styles';
+import { Loading, Owner, IssueList, IssueState, Pagination } from './styles';
 
 class Repository extends Component {
   static propTypes = {
@@ -22,6 +22,7 @@ class Repository extends Component {
     loading: true,
     issueState: 'open',
     issueStates: ['open', 'closed', 'all'],
+    page: 1,
   };
 
   componentDidMount() {
@@ -29,7 +30,7 @@ class Repository extends Component {
   }
 
   getRepoData = async () => {
-    const { issueState } = this.state;
+    const { issueState, page } = this.state;
     const { match } = this.props;
 
     const repoName = decodeURIComponent(match.params.repository);
@@ -40,6 +41,7 @@ class Repository extends Component {
         params: {
           state: issueState,
           per_page: 5,
+          page,
         },
       }),
     ]);
@@ -52,11 +54,30 @@ class Repository extends Component {
   };
 
   handleStateChange = state => {
-    this.setState({ issueState: state }, () => this.getRepoData());
+    this.setState({ issueState: state, page: 1 }, () => this.getRepoData());
+  };
+
+  handleDecrementPage = () => {
+    const { page } = this.state;
+
+    this.setState({ page: page - 1 }, () => this.getRepoData());
+  };
+
+  handleIncrementPage = () => {
+    const { page } = this.state;
+
+    this.setState({ page: page + 1 }, () => this.getRepoData());
   };
 
   render() {
-    const { repository, issues, loading, issueState, issueStates } = this.state;
+    const {
+      repository,
+      issues,
+      loading,
+      issueState,
+      issueStates,
+      page,
+    } = this.state;
 
     if (loading) {
       return <Loading>Carregando</Loading>;
@@ -99,6 +120,23 @@ class Repository extends Component {
             </li>
           ))}
         </IssueList>
+
+        <Pagination>
+          <button
+            type="button"
+            disabled={page === 1}
+            onClick={this.handleDecrementPage}
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            disabled={issues.length < 5}
+            onClick={this.handleIncrementPage}
+          >
+            Next
+          </button>
+        </Pagination>
       </Container>
     );
   }
