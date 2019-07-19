@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import Container from '../../components/Container';
 
-import { Loading, Owner, IssueList } from './styles';
+import { Loading, Owner, IssueList, IssueState } from './styles';
 
 class Repository extends Component {
   static propTypes = {
@@ -20,9 +20,16 @@ class Repository extends Component {
     repository: {},
     issues: [],
     loading: true,
+    issueState: 'open',
+    issueStates: ['open', 'closed', 'all'],
   };
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.getRepoData();
+  }
+
+  getRepoData = async () => {
+    const { issueState } = this.state;
     const { match } = this.props;
 
     const repoName = decodeURIComponent(match.params.repository);
@@ -31,7 +38,7 @@ class Repository extends Component {
       api.get(`/repos/${repoName}`),
       api.get(`/repos/${repoName}/issues`, {
         params: {
-          state: 'open',
+          state: issueState,
           per_page: 5,
         },
       }),
@@ -42,10 +49,14 @@ class Repository extends Component {
       issues: issues.data,
       loading: false,
     });
-  }
+  };
+
+  handleStateChange = state => {
+    this.setState({ issueState: state }, () => this.getRepoData());
+  };
 
   render() {
-    const { repository, issues, loading } = this.state;
+    const { repository, issues, loading, issueState, issueStates } = this.state;
 
     if (loading) {
       return <Loading>Carregando</Loading>;
@@ -61,6 +72,18 @@ class Repository extends Component {
         </Owner>
 
         <IssueList>
+          <IssueState>
+            {issueStates.map(state => (
+              <button
+                type="button"
+                disabled={issueState === state}
+                onClick={() => this.handleStateChange(state)}
+              >
+                {state}
+              </button>
+            ))}
+          </IssueState>
+
           {issues.map(issue => (
             <li key={String(issue.id)}>
               <img src={issue.user.avatar_url} alt={issue.user.login} />
